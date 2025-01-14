@@ -2,50 +2,61 @@ package gui;
 
 import gui.util.Alerts;
 import gui.util.Constraints;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.util.Callback;
+import model.entities.Person;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class ViewController implements Initializable {
 
     @FXML
-    public TextField txtNumber1;
+    public ComboBox<Person> comboBoxPerson;
 
     @FXML
-    public TextField txtNumber2;
+    public Button btnAll;
 
     @FXML
-    public Label labelResult;
+    public void onBtnAllAction(){
+        for(Person person : comboBoxPerson.getItems()){
+            System.out.println(person);
+        }
+    }
+
+    public ObservableList<Person> obsList;
 
     @FXML
-    public Button buttonSum;
-
-    @FXML
-    public void onButtonSumAction(){
-       try {
-           Locale.setDefault(Locale.UK);
-
-           double number1 = Double.parseDouble(txtNumber1.getText());
-           double number2 = Double.parseDouble(txtNumber2.getText());
-           double sum = number1 + number2;
-           labelResult.setText(String.format("%.2f", sum));
-       } catch (NumberFormatException e) {
-           Alerts.showAlert("Error", "Parse Error", e.getMessage(), Alert.AlertType.ERROR);
-       }
+    public void onComboBoxPersonAction(){
+        Person person = comboBoxPerson.getSelectionModel().getSelectedItem();
+        System.out.println(person);
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        Constraints.setTextFieldDouble(txtNumber1);
-        Constraints.setTextFieldDouble(txtNumber2);
-        Constraints.setTextFieldMaxLength(txtNumber1, 12);
-        Constraints.setTextFieldMaxLength(txtNumber2, 12);
+        List<Person> list = new ArrayList<>();
+        list.add(new Person(1, "Marie", "marie@hotmail.com"));
+        list.add(new Person(2, "John", "jon@hotmail.com"));
+        list.add(new Person(3, "Bobby", "bob@hotmail.com"));
+
+        obsList = FXCollections.observableList(list);
+        comboBoxPerson.setItems(obsList);
+
+        Callback<ListView<Person>, ListCell<Person>> factory = lv -> new ListCell<Person>() {
+            @Override
+            protected void updateItem(Person item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? "" : item.getName());
+            }
+        };
+        comboBoxPerson.setCellFactory(factory);
+        comboBoxPerson.setButtonCell(factory.call(null));
     }
 }
